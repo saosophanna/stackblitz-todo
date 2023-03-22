@@ -36,7 +36,7 @@ export default function Home() {
                 <Todo hook={todo_hooker} key={todo.id} item={todo} />
               ))
             ) : (
-              <p>No result. Create a new one instead!</p>
+              <p>{todo_hooker.message}</p>
             )}
           </ul>
         </div>

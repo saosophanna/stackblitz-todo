@@ -13,7 +13,7 @@ export function fetchDatasource() {
 }
 
 export function syncDatasource() {
-  fetch('https://kafe-39ba8.firebaseio.com/todo.json', {
+  return fetch('https://kafe-39ba8.firebaseio.com/todo.json', {
     method: 'PUT',
     body: JSON.stringify(todo_datasource),
     headers: {
@@ -32,10 +32,10 @@ const controller: { [method: string]: Function } = {
     Delete(req, res),
 };
 
-export function handler(req: NextApiRequest, res: NextApiResponse<any>) {
+export async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   if (!req.method) return res.status(405);
 
-  return controller[req.method](req, res);
+  return await controller[req.method](req, res);
 }
 
 export async function Post(req: NextApiRequest, res: NextApiResponse<any>) {

@@ -9,6 +9,7 @@ export enum TODOActon {
 export interface TodoHooker {
   todo: string;
   items: Array<TodoItem>;
+  message: string;
   handleAddTodo: () => void;
   handleTodoTextChanged: (value: string) => void;
   handleRemoveTodo: (todo: TodoItem) => void;
@@ -21,9 +22,21 @@ export function useTodo(): TodoHooker {
   const [todo, setTodo] = useState('');
   const [items, setItems] = useState<TodoItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<TodoItem | undefined>();
+
   function handleFetchTodo() {
     todoRepo.fetchTodo().then((res) => setItems(res));
   }
+
+  const filterResult = useMemo(() => {
+    return items.filter((p) => p.todo.startsWith(todo));
+  }, [items, todo]);
+
+  const message = useMemo(() => {
+    if (!selectedItem && todo != '')
+      return '“No result. Create a new one instead!';
+
+    return '';
+  }, [todo, items, selectedItem]);
 
   function todoAction(todo: TodoItem, action: TODOActon) {
     switch (action) {
@@ -40,10 +53,6 @@ export function useTodo(): TodoHooker {
         throw new Error();
     }
   }
-
-  const filterResult = useMemo(() => {
-    return items.filter((p) => p.todo.startsWith(todo));
-  }, [items, todo]);
 
   const handleTodoTextChanged = function (value: string) {
     setTodo(value);
@@ -114,7 +123,7 @@ export function useTodo(): TodoHooker {
 
   const handleMakeComplate = function (todo: TodoItem) {
     todo.isComplated = !todo.isComplated;
-    todoRepo.updateTodo(todo).then((res) => {
+    return todoRepo.updateTodo(todo).then((res) => {
       handleFetchTodo();
     });
   };
@@ -128,5 +137,6 @@ export function useTodo(): TodoHooker {
     handleEditTodo,
     handleUpdateTodo,
     handleMakeComplate,
+    message,
   };
 }
