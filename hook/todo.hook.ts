@@ -1,8 +1,20 @@
 import { TodoItem } from '../models/todo.model';
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from 'react';
 import * as todoRepo from '../utils/todo.repo';
-import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, setDoc, Timestamp, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase/firebase.config';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  onSnapshot,
+  orderBy,
+  query,
+  setDoc,
+  Timestamp,
+  updateDoc,
+} from 'firebase/firestore';
+import { db } from '/firebase/firebase.config';
 export enum TODOActon {
   Mark,
   Edit,
@@ -56,11 +68,11 @@ export function useTodo(): TodoHooker {
   }
 
   function updateTodo(todo: TodoItem) {
-    let todo_doc = doc(db(), "todo", todo.id)
-    setDoc(todo_doc, todo).then(res => {
+    let todo_doc = doc(db(), 'todo', todo.id);
+    setDoc(todo_doc, todo).then((res) => {
       setSelectedItem(undefined);
       setTodo('');
-    })
+    });
   }
 
   const handleTodoTextChanged = function (value: string) {
@@ -68,7 +80,6 @@ export function useTodo(): TodoHooker {
   };
 
   const handleAddTodo = function () {
-
     if (todo.trim() == '') return;
 
     //Check exsting
@@ -87,7 +98,7 @@ export function useTodo(): TodoHooker {
       );
       if (update_todo) {
         update_todo.todo = todo;
-        updateTodo(update_todo)
+        updateTodo(update_todo);
       }
 
       return;
@@ -104,18 +115,15 @@ export function useTodo(): TodoHooker {
     //   handleFetchTodo();
     //   setTodo('');
     // });
-    let todo_collection = collection(db(),"todo")
-    addDoc(todo_collection,todo_item).then(res=>{
-      setTodo('')
-    })
+    let todo_collection = collection(db(), 'todo');
+    addDoc(todo_collection, todo_item).then((res) => {
+      setTodo('');
+    });
   };
 
   const handleRemoveTodo = function (todo: TodoItem) {
-
-    
-    let todo_doc = doc(db(), "todo", todo.id)
-    deleteDoc(todo_doc).then(res=>{
-    })
+    let todo_doc = doc(db(), 'todo', todo.id);
+    deleteDoc(todo_doc).then((res) => {});
   };
 
   const handleEditTodo = function (todo: TodoItem) {
@@ -125,31 +133,29 @@ export function useTodo(): TodoHooker {
 
   const handleMakeComplate = function (todo: TodoItem) {
     todo.isComplated = !todo.isComplated;
-    updateTodo(todo)
+    updateTodo(todo);
   };
 
   useEffect(() => {
     //handleFetchTodo();
     //
-    let todo_col= collection(db(),"todo",)
-    let todo_quary = query(todo_col,orderBy("createdAt","desc"))
-    
-    return onSnapshot(todo_quary,(snapshot)=>{
-      let items:TodoItem[] = []
-      snapshot.forEach(docShapshot=>{
+    let todo_col = collection(db(), 'todo');
+    let todo_quary = query(todo_col, orderBy('createdAt', 'desc'));
+
+    return onSnapshot(todo_quary, (snapshot) => {
+      let items: TodoItem[] = [];
+      snapshot.forEach((docShapshot) => {
         let data = docShapshot.data();
 
         items.push({
           id: docShapshot.id,
           createdAt: data.createdAt,
           isComplated: data.isComplated,
-          todo:data.todo
-        })
-
-      })
-      setItems(items)
-    })
-
+          todo: data.todo,
+        });
+      });
+      setItems(items);
+    });
   }, []);
 
   return {
