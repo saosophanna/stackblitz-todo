@@ -58,7 +58,7 @@ export function useTodo(): TodoHooker {
   };
 
   const handleAddTodo = function () {
-    if (todo == '') return;
+    if (todo.trim() == '') return;
 
     //Check exsting
     let is_existed = items.some(

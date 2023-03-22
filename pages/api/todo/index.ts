@@ -57,16 +57,4 @@ export async function Get(
   return res.status(200).json(todo_datasource);
 }
 
-export async function Delete(
-  req: NextApiRequest,
-  res: NextApiResponse<TodoItem>
-) {
-  let { id } = req.query;
-  let index = todo_datasource.findIndex((p) => p.id == id);
-  todo_datasource.splice(index, 1);
-
-  await syncDatasource();
-  return res.status(200).json(todo_datasource[0]);
-}
-
 export default handler;
