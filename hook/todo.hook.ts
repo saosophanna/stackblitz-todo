@@ -1,6 +1,8 @@
-import { TodoItem } from '/models/todo.model';
-import { useEffect, useMemo, useReducer, useState } from 'react';
+import { TodoItem } from '../models/todo.model';
+import { useEffect, useMemo, useReducer, useState } from "react";
 import * as todoRepo from '../utils/todo.repo';
+import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, setDoc, Timestamp, updateDoc } from 'firebase/firestore';
+import { db } from '../firebase/firebase.config';
 export enum TODOActon {
   Mark,
   Edit,
@@ -53,11 +55,20 @@ export function useTodo(): TodoHooker {
     }
   }
 
+  function updateTodo(todo: TodoItem) {
+    let todo_doc = doc(db(), "todo", todo.id)
+    setDoc(todo_doc, todo).then(res => {
+      setSelectedItem(undefined);
+      setTodo('');
+    })
+  }
+
   const handleTodoTextChanged = function (value: string) {
     setTodo(value);
   };
 
   const handleAddTodo = function () {
+
     if (todo.trim() == '') return;
 
     //Check exsting
@@ -76,12 +87,7 @@ export function useTodo(): TodoHooker {
       );
       if (update_todo) {
         update_todo.todo = todo;
-        //Update todo item to api
-        todoRepo.updateTodo(update_todo).then((res) => {
-          handleFetchTodo();
-          setSelectedItem(undefined);
-          setTodo('');
-        });
+        updateTodo(update_todo)
       }
 
       return;
@@ -89,24 +95,27 @@ export function useTodo(): TodoHooker {
 
     let todo_item: TodoItem = {
       id: crypto.randomUUID(),
-      createdAt: new Date(),
+      createdAt: Timestamp.now(),
       isComplated: false,
       todo: todo,
     };
 
-    todoRepo.submit(todo_item).then((res) => {
-      handleFetchTodo();
-      setTodo('');
-    });
+    // todoRepo.submit(todo_item).then((res) => {
+    //   handleFetchTodo();
+    //   setTodo('');
+    // });
+    let todo_collection = collection(db(),"todo")
+    addDoc(todo_collection,todo_item).then(res=>{
+      setTodo('')
+    })
   };
 
   const handleRemoveTodo = function (todo: TodoItem) {
-    todoRepo.removeTodo(todo.id).then((res) => {
-      let index = items.indexOf(todo);
-      items.splice(index, 1);
-      setItems([...items]);
-      console.log(items);
-    });
+
+    
+    let todo_doc = doc(db(), "todo", todo.id)
+    deleteDoc(todo_doc).then(res=>{
+    })
   };
 
   const handleEditTodo = function (todo: TodoItem) {
@@ -116,13 +125,31 @@ export function useTodo(): TodoHooker {
 
   const handleMakeComplate = function (todo: TodoItem) {
     todo.isComplated = !todo.isComplated;
-    return todoRepo.updateTodo(todo).then((res) => {
-      handleFetchTodo();
-    });
+    updateTodo(todo)
   };
 
   useEffect(() => {
-    handleFetchTodo();
+    //handleFetchTodo();
+    //
+    let todo_col= collection(db(),"todo",)
+    let todo_quary = query(todo_col,orderBy("createdAt","desc"))
+    
+    return onSnapshot(todo_quary,(snapshot)=>{
+      let items:TodoItem[] = []
+      snapshot.forEach(docShapshot=>{
+        let data = docShapshot.data();
+
+        items.push({
+          id: docShapshot.id,
+          createdAt: data.createdAt,
+          isComplated: data.isComplated,
+          todo:data.todo
+        })
+
+      })
+      setItems(items)
+    })
+
   }, []);
 
   return {
