@@ -20,13 +20,13 @@ export function fetchTodo(): Promise<TodoItem[]> {
 }
 
 export function removeTodo(id: string) {
-  return fetch('/api/todo?id=' + id, {
+  return fetch('/api/todo/' + id, {
     method: 'DELETE',
   });
 }
 
 export function updateTodo(todo: TodoItem) {
-  return fetch('/api/todo', {
+  return fetch('/api/todo/' + todo.id, {
     method: 'PUT',
     body: JSON.stringify(todo),
     headers: {

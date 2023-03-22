@@ -1,50 +1,28 @@
 import { TodoItem } from '/models/todo.model';
 import { NextApiRequest, NextApiResponse } from 'next';
+import {
+  datasource,
+  syncDatasource,
+  fetchDatasource,
+} from '/database/database.service';
 
 let todo_datasource: Array<TodoItem> = [];
 let todo_index: { [index: string]: TodoItem | undefined } = {};
 
-export function fetchDatasource() {
-  return fetch('https://kafe-39ba8.firebaseio.com/todo.json', {
-    method: 'GET',
-  })
-    .then(async (res) => (todo_datasource = (await res.json()) as TodoItem[]))
-    .then((res) => (todo_datasource = todo_datasource ?? []));
-}
-
-export function syncDatasource() {
-  return fetch('https://kafe-39ba8.firebaseio.com/todo.json', {
-    method: 'PUT',
-    body: JSON.stringify(todo_datasource),
-    headers: {
-      'content-type': 'application/json',
-    },
-  });
-}
-
-fetchDatasource();
-
 const controller: { [method: string]: Function } = {
   POST: (req: NextApiRequest, res: NextApiResponse<TodoItem>) => Post(req, res),
-  PUT: (req: NextApiRequest, res: NextApiResponse<TodoItem>) => Put(req, res),
   GET: (req: NextApiRequest, res: NextApiResponse<TodoItem[]>) => Get(req, res),
-  DELETE: (req: NextApiRequest, res: NextApiResponse<TodoItem>) =>
-    Delete(req, res),
 };
 
 export async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   if (!req.method) return res.status(405);
-
+  await fetchDatasource();
+  todo_datasource = datasource();
   return await controller[req.method](req, res);
 }
 
 export async function Post(req: NextApiRequest, res: NextApiResponse<any>) {
   let todo: TodoItem = req.body;
-
-  if (todo_index[todo.id])
-    return res.status(400).json({
-      message: 'Item Already exist',
-    });
 
   todo_datasource.push(todo);
   todo_index[todo.id] = todo;
@@ -54,8 +32,10 @@ export async function Post(req: NextApiRequest, res: NextApiResponse<any>) {
 }
 
 export async function Put(req: NextApiRequest, res: NextApiResponse<any>) {
+  const { id } = req.query;
+
   let data: TodoItem = req.body;
-  let item = todo_datasource.find((p) => p.id == data.id);
+  let item = todo_datasource.find((p) => p.id == id);
   if (!item)
     return res.status(400).json({
       message: 'Item not found',
@@ -74,8 +54,6 @@ export async function Get(
   req: NextApiRequest,
   res: NextApiResponse<TodoItem[]>
 ) {
-  await fetchDatasource();
-
   return res.status(200).json(todo_datasource);
 }
 

@@ -14,7 +14,6 @@ export interface TodoHooker {
   handleTodoTextChanged: (value: string) => void;
   handleRemoveTodo: (todo: TodoItem) => void;
   handleEditTodo: (todo: TodoItem) => void;
-  handleUpdateTodo: () => void;
   handleMakeComplate: (todo: TodoItem) => void;
 }
 
@@ -24,7 +23,7 @@ export function useTodo(): TodoHooker {
   const [selectedItem, setSelectedItem] = useState<TodoItem | undefined>();
 
   function handleFetchTodo() {
-    todoRepo.fetchTodo().then((res) => setItems(res));
+    return todoRepo.fetchTodo().then((res) => setItems(res));
   }
 
   const filterResult = useMemo(() => {
@@ -115,18 +114,16 @@ export function useTodo(): TodoHooker {
     setTodo(todo.todo);
   };
 
-  const handleUpdateTodo = function () {};
-
-  useEffect(() => {
-    handleFetchTodo();
-  }, []);
-
   const handleMakeComplate = function (todo: TodoItem) {
     todo.isComplated = !todo.isComplated;
     return todoRepo.updateTodo(todo).then((res) => {
       handleFetchTodo();
     });
   };
+
+  useEffect(() => {
+    handleFetchTodo();
+  }, []);
 
   return {
     todo,
@@ -135,7 +132,6 @@ export function useTodo(): TodoHooker {
     handleTodoTextChanged,
     handleRemoveTodo,
     handleEditTodo,
-    handleUpdateTodo,
     handleMakeComplate,
     message,
   };
