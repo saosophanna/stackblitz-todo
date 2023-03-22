@@ -1,0 +1,13 @@
+.todo-item-container{
+  background: transparent;
+}
+
+.todo-item-container:hover .action-button
+{
+   visibility: visible;
+}
+.action-button{
+  visibility: hidden;
+  padding: 2px;
+  margin: 2px;
+}

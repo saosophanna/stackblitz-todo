@@ -1,0 +1,15 @@
+.container{
+    width: 1200;
+}
+.remove-button{
+    visibility: collapse;
+    background: rebeccapurple;
+}
+
+
+.todo-item-container:hover ,.remove-button{
+    visibility: visible;
+    background: red;
+    background: red;
+}
+
